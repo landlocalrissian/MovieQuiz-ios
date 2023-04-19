@@ -36,7 +36,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
        
-       imageView.layer.cornerRadius = 20
+       imageView.layer.cornerRadius = 15
+        imageView.layer.borderWidth = 5
         questionFactory = QuestionFactoryImpl(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticServiceImpl()
         
