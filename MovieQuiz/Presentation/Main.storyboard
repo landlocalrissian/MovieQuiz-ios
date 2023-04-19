@@ -129,6 +129,9 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="ccz-o2-L33">
+                                <rect key="frame" x="197" y="438" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black (iOS)"/>
@@ -137,9 +140,12 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="6Yl-16-7rg" secondAttribute="trailing" constant="20" id="Tkb-UF-Qpp"/>
                             <constraint firstItem="6Yl-16-7rg" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="Upq-wz-tU6"/>
                             <constraint firstItem="6Yl-16-7rg" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="e2F-O1-eeR"/>
+                            <constraint firstItem="ccz-o2-L33" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="nfA-3L-hec"/>
+                            <constraint firstItem="ccz-o2-L33" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="paW-Sl-9hr"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="ccz-o2-L33" id="Q9w-Z5-Uuh"/>
                         <outlet property="counterLabel" destination="O2v-lN-o2o" id="QMN-OY-ro0"/>
                         <outlet property="imageView" destination="9Ge-zZ-NvK" id="kLC-2F-k7v"/>
                         <outlet property="noButton" destination="de0-wK-cHz" id="FGY-if-oEb"/>
