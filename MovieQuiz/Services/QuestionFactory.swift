@@ -7,12 +7,6 @@
 
 import Foundation
 
-protocol  QuestionFactoryDelagate: AnyObject {
-    func didRecieveQuestion(_ question: QuizQuestion)
-    func didLoadDataFromServer() // сообщение об успешной загрузке
-    func didFailToLoadData(with error: Error) // сообщение об ошибке загрузки
-    }
-
 protocol QuestionFactory {
     func requestNextQuestion()
     func loadData()
