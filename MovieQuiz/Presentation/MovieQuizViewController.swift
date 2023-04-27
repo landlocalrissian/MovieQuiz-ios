@@ -11,7 +11,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // на удаление
-    private var currentQuestion: QuizQuestion?
 
     
     
@@ -87,7 +86,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 return
         }
             
-        currentQuestion = question
+        presenter.currentQuestion = question
         let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
