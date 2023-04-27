@@ -12,7 +12,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // на удаление
     private var questionFactory: QuestionFactory?
-    private var correctAnswers: Int = 0
     private var alertPresenter: AlertPresenter?
 
     
@@ -65,12 +64,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 guard let self = self else { return }
                 
                 self.presenter.resetQuestionIndex()
-                self.correctAnswers = 0
+                self.presenter.restartGame()
                 self.questionFactory?.loadData()
                 self.questionFactory?.requestNextQuestion()
             }
         alertPresenter?.show(alertModel: alertModel)
         }
+    
     
     func didLoadDataFromServer() {
         activityIndicator.isHidden = true // скрываем индикатор загрузки
@@ -94,9 +94,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
    
     func showAnswerResult(isCorrect: Bool) {
-        if isCorrect {
-            correctAnswers += 1
-        }
+        presenter.didAnswer(isYes: isCorrect)
+        
         
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
@@ -109,6 +108,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self.noButton.isEnabled = true
         }
     }
+    
+
 //    на удаление
 //    private func convert(model: QuizQuestion) -> QuizStepViewModel {
 //        return QuizStepViewModel(
@@ -132,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
         let totalPlaysCountLine = "Количество сыгранных квизов: \(statisticService.gamesCount)"
-        let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(presenter.questionsCount)"
+        let currentGameResultLine = "Ваш результат: \(presenter.correctAnswers)\\\(presenter.questionsCount)"
         let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)"
         + " (\(bestGame.date.dateTimeString))"
         let averageAccuracyLine = "Средняя точность: \(accuracy)%"

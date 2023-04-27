@@ -11,7 +11,7 @@ import UIKit
 final class MovieQuizPresenter {
     private var currentQuestionIndex: Int = 0
     let questionsCount = 10
-    private var correctAnswers: Int = 0
+    var correctAnswers: Int = 0
 
     private var alertPresenter: AlertPresenter?
     private var questionFactory: QuestionFactory?
@@ -27,8 +27,12 @@ final class MovieQuizPresenter {
         didAnswer(isYes: false)
     }
     
+    func restartGame() {
+        self.correctAnswers = 0
+
+    }
     
-    private func didAnswer(isYes: Bool) {
+    func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
         }
