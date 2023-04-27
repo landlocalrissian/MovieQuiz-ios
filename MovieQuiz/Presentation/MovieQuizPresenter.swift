@@ -12,6 +12,25 @@ final class MovieQuizPresenter {
     private var currentQuestionIndex: Int = 0
     let questionsCount = 10
     
+    
+    private var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+
+    
+    @IBAction internal func yesButtonClicked(_ sender: UIButton) {
+            let givenAnswer = true
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion?.correctAnswer)
+        }
+    
+    @IBAction internal func noButtonClicked(_ sender: UIButton) {
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
+        let givenAnswer = false
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    
+    
     func isLastQuestion() -> Bool {
             currentQuestionIndex == questionsCount - 1
         }
@@ -31,4 +50,6 @@ final class MovieQuizPresenter {
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsCount)" // ОШИБКА: `currentQuestionIndex` и `questionsAmount` неопределены
         )
     }
+    
+    
 }

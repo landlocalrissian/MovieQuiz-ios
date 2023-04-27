@@ -11,13 +11,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // на удаление
-    
+    private var currentQuestion: QuizQuestion?
+
     
     
     private var correctAnswers: Int = 0
     private var questionFactory: QuestionFactory?
     private var alertPresenter: AlertPresenter?
-    private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticService?
     private let presenter = MovieQuizPresenter()
 
@@ -93,22 +93,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
     }
-    
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-            let givenAnswer = true
-            showAnswerResult(isCorrect: givenAnswer == currentQuestion?.correctAnswer)
-        }
-    
-
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
    
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
             correctAnswers += 1
         }
