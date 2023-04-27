@@ -11,8 +11,10 @@ import UIKit
 final class MovieQuizPresenter {
     private var currentQuestionIndex: Int = 0
     let questionsCount = 10
-    
-    
+    private var correctAnswers: Int = 0
+
+    private var alertPresenter: AlertPresenter?
+    private var questionFactory: QuestionFactory?
     var currentQuestion: QuizQuestion?
     weak var viewController: MovieQuizViewController?
     
@@ -56,5 +58,32 @@ final class MovieQuizPresenter {
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsCount)" // ОШИБКА: `currentQuestionIndex` и `questionsAmount` неопределены
         )
     }
+    
+    func showNextQuestionOrResults() {
+        if self.isLastQuestion() {
+            viewController?.statisticService?.store(correct: correctAnswers, total: self.questionsCount)
+            
+            let alertModel = AlertModel(
+                title: "Игра окончена!",
+                message: (viewController?.makeResultMessage())!,
+                buttonText: "ОК",
+                buttonAction: { [weak self ] in
+                    self?.resetQuestionIndex()
+                    self?.correctAnswers = 0
+                    self?.questionFactory?.requestNextQuestion()
+                }
+            )
+            alertPresenter?.show(alertModel: alertModel)
+            
+        } else {
+            self.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
+    }
+    
+    
+    
+    
+    
     
 }

@@ -11,13 +11,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // на удаление
+    private var questionFactory: QuestionFactory?
+    private var correctAnswers: Int = 0
+    private var alertPresenter: AlertPresenter?
 
     
     
-    private var correctAnswers: Int = 0
-    private var questionFactory: QuestionFactory?
-    private var alertPresenter: AlertPresenter?
-    private var statisticService: StatisticService?
+    var statisticService: StatisticService?
     private let presenter = MovieQuizPresenter()
 
 
@@ -104,7 +104,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else {return}
-            self.showNextQuestionOrResults()
+            self.presenter.showNextQuestionOrResults()
             self.yesButton.isEnabled = true
             self.noButton.isEnabled = true
         }
@@ -125,32 +125,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         // здесь мы заполняем нашу картинку, текст и счётчик данными
     }
 
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            showFinalResults()
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
-    }
-    
-    private func showFinalResults() {
-        statisticService?.store(correct: correctAnswers, total: presenter.questionsCount)
-        
-        let alertModel = AlertModel(
-            title: "Игра окончена!",
-            message: makeResultMessage(),
-            buttonText: "ОК",
-            buttonAction: { [weak self ] in
-                self?.presenter.resetQuestionIndex()
-                self?.correctAnswers = 0
-                self?.questionFactory?.requestNextQuestion()
-            }
-        )
-        alertPresenter?.show(alertModel: alertModel)
-    }
-    
-    private func makeResultMessage() -> String {
+    func makeResultMessage() -> String {
         
         guard let statisticService = statisticService, let bestGame = statisticService.bestGame else {
             fatalError("message error")
