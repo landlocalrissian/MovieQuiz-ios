@@ -11,8 +11,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // на удаление
-    private var currentQuestionIndex: Int = 0
-    private let questionsCount = 10
+    
     
     
     private var correctAnswers: Int = 0
@@ -66,7 +65,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             buttonText: "Попробовать еще раз") { [weak self ] in
                 guard let self = self else { return }
                 
-                self.currentQuestionIndex = 0
+                self.presenter.resetQuestionIndex()
                 self.correctAnswers = 0
                 self.questionFactory?.loadData()
                 self.questionFactory?.requestNextQuestion()
@@ -142,28 +141,30 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsCount - 1 {
+        if presenter.isLastQuestion() {
             showFinalResults()
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
     }
+    
     private func showFinalResults() {
-        statisticService?.store(correct: correctAnswers, total: questionsCount)
+        statisticService?.store(correct: correctAnswers, total: presenter.questionsCount)
         
         let alertModel = AlertModel(
             title: "Игра окончена!",
             message: makeResultMessage(),
             buttonText: "ОК",
             buttonAction: { [weak self ] in
-                self?.currentQuestionIndex = 0
+                self?.presenter.resetQuestionIndex()
                 self?.correctAnswers = 0
                 self?.questionFactory?.requestNextQuestion()
             }
         )
         alertPresenter?.show(alertModel: alertModel)
     }
+    
     private func makeResultMessage() -> String {
         
         guard let statisticService = statisticService, let bestGame = statisticService.bestGame else {
@@ -171,7 +172,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
         let totalPlaysCountLine = "Количество сыгранных квизов: \(statisticService.gamesCount)"
-        let currentGameResultLine = "Ваш результат:\(correctAnswers)\\\(questionsCount)"
+        let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(presenter.questionsCount)"
         let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)"
         + " (\(bestGame.date.dateTimeString))"
         let averageAccuracyLine = "Средняя точность: \(accuracy)%"
