@@ -8,40 +8,79 @@
 import Foundation
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
+    
+    var questionFactory: QuestionFactory?
+    private weak var viewController: MovieQuizViewController?
+
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactoryImpl(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+    }
+    
     private var currentQuestionIndex: Int = 0
     let questionsCount = 10
     var correctAnswers: Int = 0
 
-    private var alertPresenter: AlertPresenter?
-    private var questionFactory: QuestionFactory?
+    var alertPresenter: AlertPresenter?
     var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewController?
-    
     
     @IBAction internal func yesButtonClicked(_ sender: UIButton) {
-        didAnswer(isYes: true)
+        didAnswer(isCorrectAnswer: true)
     }
     
     @IBAction internal func noButtonClicked(_ sender: UIButton) {
+        didAnswer(isCorrectAnswer: false)
+    }
+    
+    func yesButtonClicked() {
+        didAnswer(isYes: true)
+    }
+
+    func noButtonClicked() {
         didAnswer(isYes: false)
     }
     
-    func restartGame() {
-        self.correctAnswers = 0
-
+    func proceedWithAnswer(isCorrect: Bool) {
+        didAnswer(isCorrectAnswer: isCorrect)
+        
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+            
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            self.proceedToNextQuestionOrResults()
+        }
     }
     
-    func didAnswer(isYes: Bool) {
+    private func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
         }
-        
+
         let givenAnswer = isYes
-        
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+
+        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
+    func didAnswer(isCorrectAnswer: Bool) {
+            if isCorrectAnswer {
+                correctAnswers += 1
+            }
+        }
     
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsCount - 1
@@ -63,7 +102,7 @@ final class MovieQuizPresenter {
         )
     }
     
-    func showNextQuestionOrResults() {
+    func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             viewController?.statisticService?.store(correct: correctAnswers, total: self.questionsCount)
             
@@ -86,8 +125,35 @@ final class MovieQuizPresenter {
     }
     
     
+    // MARK: - QuestionFactoryDelegate
+
     
+    func didLoadDataFromServer() {
+            viewController?.hideLoadingIndicator()
+            questionFactory?.requestNextQuestion()
+        }
+        
+    func didFailToLoadData(with error: Error) {
+        let message = error.localizedDescription
+        viewController?.showNetworkError(message: message)
+    }
+ 
+    func didRecieveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
     
-    
-    
+    func restartGame() {
+        currentQuestionIndex = 0
+        correctAnswers = 0
+        questionFactory?.requestNextQuestion()
+        questionFactory?.loadData()
+    }
 }
