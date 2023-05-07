@@ -20,13 +20,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             self?.viewController?.show(quiz: viewModel)
         }
     }
-    
-    var questionFactory: QuestionFactory?
+    var statisticService: StatisticService?
+
+    private var questionFactory: QuestionFactory?
     private weak var viewController: MovieQuizViewController?
 
     
-    init(viewController: MovieQuizViewController) {
-        self.viewController = viewController
+    init(viewController: MovieQuizViewControllerProtocol) {
+        self.viewController = viewController as? MovieQuizViewController
         
         questionFactory = QuestionFactoryImpl(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
@@ -39,11 +40,11 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     var alertPresenter: AlertPresenter?
     var currentQuestion: QuizQuestion?
     
-    @IBAction internal func yesButtonClicked(_ sender: UIButton) {
+    @IBAction func yesButtonClicked(_ sender: UIButton) {
         didAnswer(isCorrectAnswer: true)
     }
     
-    @IBAction internal func noButtonClicked(_ sender: UIButton) {
+    @IBAction func noButtonClicked(_ sender: UIButton) {
         didAnswer(isCorrectAnswer: false)
     }
     
@@ -104,7 +105,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
-            viewController?.statisticService?.store(correct: correctAnswers, total: self.questionsCount)
+            statisticService?.store(correct: correctAnswers, total: self.questionsCount)
             
             let alertModel = AlertModel(
                 title: "Игра окончена!",

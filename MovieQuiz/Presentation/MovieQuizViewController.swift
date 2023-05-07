@@ -1,16 +1,28 @@
 import UIKit
     
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
+    func showFinalResults() {
+        
+    }
+    
+    func showNetworkError(alertModel: AlertModel) {
+        
+    }
+    
+    func showLoadingIndicator() {
+        
+    }
+    
 
     @IBOutlet var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
     
-    @IBOutlet var noButton: UIButton!
+    @IBOutlet private var noButton: UIButton!
     
-    @IBOutlet var yesButton: UIButton!
+    @IBOutlet private var yesButton: UIButton!
     
-    @IBOutlet var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
@@ -31,7 +43,6 @@ final class MovieQuizViewController: UIViewController {
         }
     
     
-    var statisticService: StatisticService?
     private var presenter: MovieQuizPresenter!
 
 
@@ -45,11 +56,8 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.cornerRadius = 20
         imageView.layer.borderWidth = 8
         presenter = MovieQuizPresenter(viewController: self)
-        statisticService = StatisticServiceImpl()
-        
-        presenter.questionFactory?.loadData()
+        presenter.statisticService = StatisticServiceImpl()
         presenter.alertPresenter = AlertPresenterImpl(viewController: self)
-
     }
 
     func highlightImageBorder(isCorrectAnswer: Bool) {
@@ -81,20 +89,6 @@ final class MovieQuizViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
 
     }
-    
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-                return
-        }
-            
-        presenter.currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
-    }
-   
-    
 
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
@@ -125,7 +119,7 @@ final class MovieQuizViewController: UIViewController {
 
     func makeResultMessage() -> String {
         
-        guard let statisticService = statisticService, let bestGame = statisticService.bestGame else {
+        guard let statisticService = presenter.statisticService, let bestGame = statisticService.bestGame else {
             fatalError("message error")
         }
         let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
@@ -141,16 +135,4 @@ final class MovieQuizViewController: UIViewController {
         
         return resultMessage
     }
-}
-
-protocol MovieQuizViewControllerProtocol: AnyObject {
-    func show(quiz step: QuizStepViewModel)
-    func show(quiz result: QuizResultsViewModel)
-    
-    func highlightImageBorder(isCorrectAnswer: Bool)
-    
-    func showLoadingIndicator()
-    func hideLoadingIndicator()
-    
-    func showNetworkError(message: String)
 }
