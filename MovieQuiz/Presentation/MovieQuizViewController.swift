@@ -1,72 +1,138 @@
 import UIKit
+    
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
+    func showFinalResults() {
+        
+    }
+    
+    func showNetworkError(alertModel: AlertModel) {
+        
+    }
+    
+    func showLoadingIndicator() {
+        
+    }
+    
 
-final class MovieQuizViewController: UIViewController {
+    @IBOutlet var imageView: UIImageView!
+    @IBOutlet private var textLabel: UILabel!
+    @IBOutlet private var counterLabel: UILabel!
+    
+    @IBOutlet private var noButton: UIButton!
+    
+    @IBOutlet private var yesButton: UIButton!
+    
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        .lightContent
+    }
+    
+    struct QuizResultAnswerViewModel {
+      let answer: Bool
+    }
+    
+    // на удаление
+    
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+            presenter.yesButtonClicked()
+        }
+
+        @IBAction private func noButtonClicked(_ sender: UIButton) {
+            presenter.noButtonClicked()
+        }
+    
+    
+    private var presenter: MovieQuizPresenter!
+
+
+    
+    
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
+       
+        imageView.layer.cornerRadius = 20
+        imageView.layer.borderWidth = 8
+        presenter = MovieQuizPresenter(viewController: self)
+        presenter.statisticService = StatisticServiceImpl()
+        presenter.alertPresenter = AlertPresenterImpl(viewController: self)
+    }
+
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 8
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+    }
+
+    func hideLoadingIndicator() {
+            activityIndicator.isHidden = true
+        }
+    
+    func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: message,
+            preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Попробовать ещё раз",
+                                   style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            
+            self.presenter.restartGame()
+        }
+        
+        alert.addAction(action)
+        self.present(alert, animated: true, completion: nil)
+
+    }
+
+    func show(quiz step: QuizStepViewModel) {
+        imageView.image = step.image
+        textLabel.text = step.question
+        counterLabel.text = step.questionNumber
+        imageView.layer.borderColor = UIColor.clear.cgColor
+        // здесь мы заполняем нашу картинку, текст и счётчик данными
+    }
+    
+    func show(quiz result: QuizResultsViewModel) {
+        let message = makeResultMessage()
+        
+        let alert = UIAlertController(
+            title: result.title,
+            message: message,
+            preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            
+            self.presenter.restartGame()
+        }
+        
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+
+    func makeResultMessage() -> String {
+        
+        guard let statisticService = presenter.statisticService, let bestGame = statisticService.bestGame else {
+            fatalError("message error")
+        }
+        let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
+        let totalPlaysCountLine = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+        let currentGameResultLine = "Ваш результат: \(presenter.correctAnswers)\\\(presenter.questionsCount)"
+        let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)"
+        + " (\(bestGame.date.dateTimeString))"
+        let averageAccuracyLine = "Средняя точность: \(accuracy)%"
+        
+        let components: [String] = [currentGameResultLine, totalPlaysCountLine, bestGameInfoLine, averageAccuracyLine
+        ]
+        let resultMessage = components.joined(separator: "\n")
+        
+        return resultMessage
     }
 }
-
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- */
