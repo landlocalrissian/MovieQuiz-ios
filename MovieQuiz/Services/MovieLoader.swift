@@ -21,7 +21,7 @@ let networkClient: NetworkRouting
     
     // MARK: - URL
     private var mostPopularMoviesUrl: URL {
-        guard let url = URL(string: "https://imdb-api.com/en/API/Top250Movies/k_uq06alq1") else {
+        guard let url = URL(string: "https://imdb-api.com/en/API/Top250Movies/k_o924fjex") else {
             preconditionFailure("Unable to construct mostPopularMoviesUrl")
         }
         return url
